@@ -57,7 +57,32 @@ app.post('/register', async (req, res) => {
 
 });
 
+app.post('/', async (req, res)=>{
+    const {email, password } = req.body;
+    const validateLogin = loginSchema.validate(req.body);
+    if (validateLogin.error) {
+        res.sendStatus(422);
+        return
+    }
+    
+    const loginUser = await db.collection("participants").findOne({email});
+    if(!loginUser){
+         res.status(409).send("Usuario não cadastrado");
+         return    
+     }
+    try {
+        db.collection("lo").insertOne({
+                email,
+                password, 
+                lastStatus: Date.now(),
+            }
+        );
 
+        const participantes = await db.collection("participants").find({}).toArray();
+        res.send(participantes);
+
+    } catch { res.sendStatus(500); } 
+})
 
 
 app.listen(5000), () => console.log("Listening on port 5000");
