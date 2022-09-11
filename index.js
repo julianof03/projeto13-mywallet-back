@@ -1,21 +1,13 @@
 import express from "express";
 import cors from "cors";
-import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
 import dayjs from "dayjs";
 import joi from "joi";
-
-
-dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-let db;
-const mongoClient = new MongoClient(process.env.MONGO_URI);
-mongoClient.connect().then(() => { db = mongoClient.db("MyWalletdb"); });
 
 let OnlineUser = 'undefined22';
 
@@ -145,8 +137,18 @@ app.get('/listscreen', async (req, res)=>{
     console.log(User);
     try {
         const outputs = await db.collection("InOut").find({User}).toArray();
-        const listarr = outputs;
-        res.send(listarr);
+        const listarr = [{
+            User: User,
+            amount: "0",
+            day: "",
+            text: "",
+            type: "status"
+        }];
+        if(outputs.length === 0){
+            res.send(listarr);
+            return
+        }
+        res.send(outputs);
     } catch { res.sendStatus(500); } 
 });
 
