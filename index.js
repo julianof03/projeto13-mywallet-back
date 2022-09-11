@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { CreateAcount, LoginUser, ListScreen } from "./user.js";
-import { CreateIn, CreateOut } from "./outputs.js";
+import { CreateAcount, LoginUser, ListScreen } from "./user.controller.js";
+import { CreateIn, CreateOut } from "./outputs.controller.js";
 const app = express();
 
 app.use(cors());
