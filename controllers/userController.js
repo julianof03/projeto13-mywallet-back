@@ -1,5 +1,5 @@
 
-import db from './db.js';
+import {db} from './dbController.js'
 import joi from "joi";
 
 const registerSchema = joi.object({
@@ -53,6 +53,7 @@ async function LoginUser(req, res){
     
     const loginUser = await db.collection("participants").findOne({email});
     OnlineUser = loginUser.name;
+    res.locals.user = OnlineUser;
     if(!loginUser){
          res.status(409).send("Usuario não cadastrado");
          return    

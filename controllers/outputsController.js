@@ -1,4 +1,4 @@
-import db from './db.js';
+import {db} from './dbController.js';
 import joi from "joi";
 import dayjs from "dayjs";
 
