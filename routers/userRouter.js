@@ -1,6 +1,5 @@
 import express  from "express";
 import { CreateAcount, LoginUser, ListScreen} from "../controllers/userController.js";
-import UserMiddleware from '../middlewares/userMiddlewares.js';
 import MidToken from "../middlewares/tokenMiddlewares.js";
 const router = express.Router();
 

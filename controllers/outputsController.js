@@ -3,15 +3,19 @@ import joi from "joi";
 import dayjs from "dayjs";
 
 const inOutSchema = joi.object({
+
     valor: joi.number().min(1).required(),
     text: joi.string().min(1).required(),
+
 });
 
 
 async function CreateIn (req, res){
+
     const user = await res.locals.userOnline.name
-    console.log(user);
+
     const {valor, text } = req.body;
+
     const validadeInOut = inOutSchema.validate(req.body);
     if (validadeInOut.error) {
         res.sendStatus(422);
@@ -33,9 +37,11 @@ async function CreateIn (req, res){
     } catch { res.sendStatus(500); } 
 };
 async function CreateOut(req, res){
+
     const user = await res.locals.userOnline.name
-    console.log(user);
+
     const {valor, text } = req.body;
+
     const validadeInOut = inOutSchema.validate(req.body);
     if (validadeInOut.error) {
         res.sendStatus(422);
@@ -52,6 +58,7 @@ async function CreateOut(req, res){
 
             }
         );
+        
         res.sendStatus(201);
 
     } catch { res.sendStatus(500); } 

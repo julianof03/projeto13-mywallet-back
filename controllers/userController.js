@@ -1,18 +1,23 @@
-
 import { db } from './dbController.js';
 import joi from "joi";
 import bcrypt from 'bcrypt';
 import {v4 as uuid} from 'uuid';
 
 const registerSchema = joi.object({
+
     name: joi.string().min(1).required(),
     email: joi.string().min(1).required(),
     password: joi.string().min(1).required(),
+
 });
+
 const loginSchema = joi.object({
+
     email: joi.string().min(1).required(),
     password: joi.string().min(1).required(),
+
 });
+
 async function CreateAcount(req, res) {
 
     const { name, email, password } = req.body;
@@ -31,6 +36,7 @@ async function CreateAcount(req, res) {
         res.status(409).send("Usuario ja existente");
         return
     }
+
     try {
         db.collection("participants").insertOne({
             name,
@@ -38,6 +44,7 @@ async function CreateAcount(req, res) {
             password: cripPassword,
         }
         );
+
         res.sendStatus(201);
 
     } catch { res.sendStatus(500); }
@@ -45,7 +52,6 @@ async function CreateAcount(req, res) {
 };
 
 async function LoginUser(req, res) {
-
 
     const { email, password } = req.body;
 
@@ -73,24 +79,24 @@ async function LoginUser(req, res) {
                 token,
                 name: loginUser.name,
                 email
-            }
-            );
+            });
+
             res.status(201).send({ password, name: loginUser.name, token});
+
         }else{
             res.sendStatus(401);
         }
 
     } catch { res.sendStatus(501); }
 }
+
 async function ListScreen(req, res) {
 
     const user = await res.locals.userOnline.name
-    console.log(user + " esse é o UserOnline");
 
     try {
 
         const outputs = await db.collection("InOut").find({ user }).toArray();
-        console.log(outputs +" esse é o output");
         const listarr = [{
             User: user,
             amount: "0",
@@ -98,9 +104,7 @@ async function ListScreen(req, res) {
             text: "",
             type: "status"
         }];
-        console.log(outputs.length + " essa é a largura");
         if (outputs.length === 0) {
-            console.log("ele esta vazio");
             res.send(listarr);
             return
         }
