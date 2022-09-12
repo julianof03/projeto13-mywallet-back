@@ -1,6 +1,8 @@
 
-import {db} from './dbController.js'
+import { db } from './dbController.js';
 import joi from "joi";
+import bcrypt from 'bcrypt';
+import {v4 as uuid} from 'uuid';
 
 const registerSchema = joi.object({
     name: joi.string().min(1).required(),
@@ -11,84 +13,101 @@ const loginSchema = joi.object({
     email: joi.string().min(1).required(),
     password: joi.string().min(1).required(),
 });
-let OnlineUser = 'undefined22';
 async function CreateAcount(req, res) {
 
     const { name, email, password } = req.body;
+    
+    const cripPassword = bcrypt.hashSync(password, 10);
+
     const validateRegister = registerSchema.validate(req.body);
+
     if (validateRegister.error) {
         res.sendStatus(422);
         return
     }
-    console.log(name, email, password);
-    
-    const registreUser = await db.collection("participants").findOne({email});
-    if(registreUser){
-         res.status(409).send("Usuario ja existente");
-         return    
-     }
+
+    const registreUser = await db.collection("participants").findOne({ email });
+    if (registreUser) {
+        res.status(409).send("Usuario ja existente");
+        return
+    }
     try {
         db.collection("participants").insertOne({
-                name,
-                email,
-                password, 
-                lastStatus: Date.now(),
-            }
+            name,
+            email,
+            password: cripPassword,
+        }
         );
- 
-        const participantes = await db.collection("participants").find({}).toArray();
-        res.send(201);
+        res.sendStatus(201);
 
     } catch { res.sendStatus(500); }
 
 };
 
-async function LoginUser(req, res){
-    const {email, password } = req.body;
+async function LoginUser(req, res) {
+
+
+    const { email, password } = req.body;
+
     const validateLogin = loginSchema.validate(req.body);
+
     if (validateLogin.error) {
         res.sendStatus(422);
         return
     }
-    
-    const loginUser = await db.collection("participants").findOne({email});
-    OnlineUser = loginUser.name;
-    res.locals.user = OnlineUser;
-    if(!loginUser){
-         res.status(409).send("Usuario não cadastrado");
-         return    
-     }
+
     try {
-        db.collection("participants").insertOne({
-                email,
-                password, 
-                lastStatus: Date.now(),
+
+        const loginUser = await db.collection("participants").findOne({ email });
+        console.log(loginUser);
+        if (!loginUser) {
+            res.status(409).send("Usuario não cadastrado");
+            return
+        }
+
+        if(email && bcrypt.compareSync(password, loginUser.password)){
+
+            const token = uuid();
+
+            db.collection("onlineUser").insertOne({
+                token,
+                name: loginUser.name,
+                email
             }
-        );
+            );
+            res.status(201).send({ password, name: loginUser.name, token});
+        }else{
+            res.sendStatus(401);
+        }
 
-        const participantes = await db.collection("participants").find({}).toArray();
-        res.send(participantes);
-
-    } catch { res.sendStatus(500); } 
+    } catch { res.sendStatus(501); }
 }
-async function ListScreen(req, res){
-    const User = OnlineUser;
-    console.log(User);
+async function ListScreen(req, res) {
+
+    const user = await res.locals.userOnline.name
+    console.log(user + " esse é o UserOnline");
+
     try {
-        const outputs = await db.collection("InOut").find({User}).toArray();
+
+        const outputs = await db.collection("InOut").find({ user }).toArray();
+        console.log(outputs +" esse é o output");
         const listarr = [{
-            User: User,
+            User: user,
             amount: "0",
             day: "",
             text: "",
             type: "status"
         }];
-        if(outputs.length === 0){
+        console.log(outputs.length + " essa é a largura");
+        if (outputs.length === 0) {
+            console.log("ele esta vazio");
             res.send(listarr);
             return
         }
+
         res.send(outputs);
-    } catch { res.sendStatus(500); } 
+
+    } catch { res.sendStatus(501); }
 };
 
-export {CreateAcount, LoginUser, ListScreen} ;
+export { CreateAcount, LoginUser, ListScreen };

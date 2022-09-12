@@ -7,11 +7,12 @@ const inOutSchema = joi.object({
     text: joi.string().min(1).required(),
 });
 
+
 async function CreateIn (req, res){
+    const user = await res.locals.userOnline.name
+    console.log(user);
     const {valor, text } = req.body;
     const validadeInOut = inOutSchema.validate(req.body);
-    const User = OnlineUser;
-    console.log(User);
     if (validadeInOut.error) {
         res.sendStatus(422);
         return
@@ -19,7 +20,7 @@ async function CreateIn (req, res){
     
     try {
         db.collection("InOut").insertOne({
-                User,
+                user,
                 day: dayjs().format("DD/MM"),
                 amount: valor,
                 text: text,
@@ -32,10 +33,10 @@ async function CreateIn (req, res){
     } catch { res.sendStatus(500); } 
 };
 async function CreateOut(req, res){
+    const user = await res.locals.userOnline.name
+    console.log(user);
     const {valor, text } = req.body;
     const validadeInOut = inOutSchema.validate(req.body);
-    const User = OnlineUser;
-    console.log(User);
     if (validadeInOut.error) {
         res.sendStatus(422);
         return
@@ -43,8 +44,8 @@ async function CreateOut(req, res){
     
     try {
         db.collection("InOut").insertOne({
-                User,
-                day: dayjs().format("DD:MM"),
+                user,
+                day: dayjs().format("DD/MM"),
                 amount: valor,
                 text: text,
                 type: 'out',
